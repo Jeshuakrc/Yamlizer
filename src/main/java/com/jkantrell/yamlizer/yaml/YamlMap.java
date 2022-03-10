@@ -1,4 +1,4 @@
-package com.jkantrell.pluginCommons.yaml;
+package com.jkantrell.yamlizer.yaml;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

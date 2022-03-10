@@ -1,6 +1,6 @@
-package com.jkantrell.pluginCommons.yaml;
+package com.jkantrell.yamlizer.yaml;
 
-import com.jkantrell.pluginCommons.reflect.GenericHandler;
+import com.jkantrell.yamlizer.reflect.GenericHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.jkantrell</groupId>
-    <artifactId>PluginCommons</artifactId>
+    <artifactId>Yamlizer</artifactId>
     <version>main-SNAPSHOT</version>
 
     <properties>
@@ -44,7 +44,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.jkantrell.pluginCommons.Main</mainClass>
+                            <mainClass>com.jkantrell.yamlizer.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

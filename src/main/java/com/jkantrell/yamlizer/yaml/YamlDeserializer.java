@@ -1,4 +1,4 @@
-package com.jkantrell.pluginCommons.yaml;
+package com.jkantrell.yamlizer.yaml;
 
 import java.lang.reflect.Type;
 

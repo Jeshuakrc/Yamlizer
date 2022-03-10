@@ -1,6 +1,5 @@
-package com.jkantrell.pluginCommons.reflect;
+package com.jkantrell.yamlizer.reflect;
 
-import javax.lang.model.element.TypeElement;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 

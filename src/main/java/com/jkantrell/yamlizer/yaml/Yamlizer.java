@@ -1,6 +1,6 @@
-package com.jkantrell.pluginCommons.yaml;
+package com.jkantrell.yamlizer.yaml;
 
-import com.jkantrell.pluginCommons.reflect.GenericHandler;
+import com.jkantrell.yamlizer.reflect.GenericHandler;
 
 import java.lang.reflect.Type;
 import java.util.HashSet;
