@@ -1,6 +1,6 @@
 package com.jkantrell.yamlizer.yaml;
 
-import com.jkantrell.yamlizer.reflect.GenericHandler;
+import com.jkantrell.yamlizer.reflect.TypeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -28,7 +28,6 @@ public abstract class AbstractYamlConfig {
      */
     public AbstractYamlConfig(String filePath) {
         this.filePath = filePath;
-        this.addDeserializers_();
     }
 
     //SETTERS
@@ -83,14 +82,22 @@ public abstract class AbstractYamlConfig {
         YamlMap map = new YamlMap(in);
 
         for (Field field : this.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(ConfigField.class)) {}
+            if (!field.isAnnotationPresent(ConfigField.class)) { continue; }
 
             try {
-                field.set(this,this.yamlizer.deserialize(map.get(field.getName()),field.getGenericType()));
+
+                Type type = field.getGenericType();
+                Object val = this.yamlizer.deserialize(map.get(field.getName()),type);
+
+                field.set(this,val);
+                try {
+                    LOGGER.info("Setting " + field.getName() + " to " + val.toString());
+                } catch (NullPointerException ignore) {}
             } catch (Exception e) {
                 LOGGER.warn(
                     "Unable to load " + field.getName() + " due to " + e.getClass().toString() + ". Using default."
                 );
+                e.printStackTrace();
             }
         }
 
@@ -223,70 +230,5 @@ public abstract class AbstractYamlConfig {
             }
         }
         return map;
-    }
-
-    //PRIVATE METHODS
-    private void addDeserializers_() {
-        HashMap<Class,YamlDeserializer> map = new HashMap<>();
-        map.put(
-                String.class,
-                (e,t) -> e.get(YamlElementType.STRING)
-        );
-        map.put(
-                Double.class,
-                (e,t) -> e.get(YamlElementType.DOUBLE)
-        );
-        map.put(
-                byte.class,
-                (e,t) -> e.get(YamlElementType.INT).byteValue()
-        );
-        map.put(
-                short.class,
-                (e,t) -> e.get(YamlElementType.INT).shortValue()
-        );
-        map.put(
-                int.class,
-                (e,t) -> e.get(YamlElementType.INT).intValue()
-        );
-        map.put(
-                long.class,
-                (e,t) -> e.get(YamlElementType.INT).longValue()
-        );
-        map.put(
-                float.class,
-                (e,t) -> e.get(YamlElementType.DOUBLE).floatValue()
-        );
-        map.put(
-                double.class,
-                (e,t) -> e.get(YamlElementType.DOUBLE).doubleValue()
-        );
-        map.put(
-                char.class,
-                (e,t) -> e.get(YamlElementType.STRING).charAt(0)
-        );
-        map.put(
-                boolean.class,
-                (e,t) -> e.get(YamlElementType.BOOL).booleanValue()
-        );
-        map.put(
-                List.class,
-                (e,t) -> {
-                    GenericHandler genericHandler = new GenericHandler(t);
-                    List<YamlElement> yamlElements = e.get(YamlElementType.LIST);
-                    List list = new LinkedList();
-                    for (YamlElement element : yamlElements) {
-                        list.add(this.yamlizer.deserialize(element,genericHandler.getParameterHandlers()[0].getType()));
-                    }
-                    try {
-                        Constructor<?> constructor = genericHandler.getClazz().getConstructor(Collection.class);
-                        return constructor.newInstance(list);
-                    } catch (Exception ex) {
-                        throw new ClassCastException(ex.getMessage());
-                    }
-                }
-        );
-        for (Map.Entry<Class,YamlDeserializer> entry : map.entrySet()) {
-            this.yamlizer.addSerializationRule(entry.getKey(),entry.getValue());
-        }
     }
 }

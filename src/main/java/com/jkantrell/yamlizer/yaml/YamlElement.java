@@ -26,7 +26,6 @@ public class YamlElement {
     public YamlElement(Object element) {
         this.element = element;
         YamlElementType<?> type = YamlElementType.assign(element);
-        AbstractYamlConfig.LOGGER.info(element.getClass().toString());
         if (type == null) { throw new IllegalArgumentException("Not assignable to Yaml scalar"); }
         this.type = type;
     }
@@ -38,7 +37,6 @@ public class YamlElement {
      * @return true if the type provided matches the element's type, false otherwise.
      */
     public boolean is(YamlElementType<?> type) {
-        AbstractYamlConfig.LOGGER.info(this.type.getType().toString() + "\n" + type.getType().toString());
         return this.type.equals(type);
     }
 
