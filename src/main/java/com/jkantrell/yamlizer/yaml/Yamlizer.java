@@ -32,6 +32,17 @@ public class Yamlizer {
             return array;
         }
 
+        if (type.getType() instanceof Class clazz) {
+            if (clazz.isEnum()) {
+                String val = src.get(YamlElementType.STRING);
+                try {
+                    return Enum.valueOf(clazz, val);
+                } catch (IllegalArgumentException ex) {
+                    throw new IllegalArgumentException("'" + val + "' is not a valid value for " + clazz.getSimpleName());
+                }
+            }
+        }
+
         try {
             return this.getSerialization_(type).deserializer().deserialize(src,type.getType());
         } catch (Exception e) {
