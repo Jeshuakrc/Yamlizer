@@ -1,6 +1,5 @@
 package com.jkantrell.yamlizer.yaml;
 
-import com.jkantrell.yamlizer.reflect.TypeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -46,7 +45,7 @@ public abstract class AbstractYamlConfig {
      * @param subPath the sub-path.
      */
     public void setSubPath(String subPath) {
-        this.filePath = subPath;
+        this.subPath = subPath;
     }
 
     //GETTERS
@@ -80,24 +79,29 @@ public abstract class AbstractYamlConfig {
     public void load() throws FileNotFoundException {
         InputStream in = new FileInputStream(this.filePath);
         YamlMap map = new YamlMap(in);
+        if (!subPath.equals("")) { map = map.gerFromPath(subPath).get(YamlElementType.MAP); }
 
         for (Field field : this.getClass().getDeclaredFields()) {
             if (!field.isAnnotationPresent(ConfigField.class)) { continue; }
+            ConfigField annotation = field.getAnnotation(ConfigField.class);
+            String path = (annotation.path().equals("")) ? field.getName() : annotation.path();
 
             try {
 
                 Type type = field.getGenericType();
-                Object val = this.yamlizer.deserialize(map.get(field.getName()),type);
+                Object val = this.yamlizer.deserialize(map.gerFromPath(path),type);
 
                 field.set(this,val);
-                try {
-                    LOGGER.info("Setting " + field.getName() + " to " + val.toString());
-                } catch (NullPointerException ignore) {}
+                LOGGER.info("Setting " + field.getName() + " to " + val.toString());
             } catch (Exception e) {
                 LOGGER.warn(
                     "Unable to load " + field.getName() + " due to " + e.getClass().toString() + ". Using default."
                 );
-                e.printStackTrace();
+                if (e instanceof NullPointerException) {
+                    LOGGER.warn("The path '" + ((this.subPath.equals(""))?"":(this.subPath + ".")) + path + "' wasn't found in '" + this.filePath + "'.");
+                } else {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -219,6 +223,11 @@ public abstract class AbstractYamlConfig {
         return true;
     }
 
+    /**
+     * Gets a Map in which the keys are Strings with the Config class' field names and the values are the objects containing sigh fields.
+     *
+     * @return The 'Field : Object' Map.
+     */
     public Map<String,Object> values() {
         Map<String,Object> map = new HashMap<>();
 
