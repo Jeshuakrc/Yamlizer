@@ -1,9 +1,9 @@
 package com.jkantrell.yamlizer.yaml;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
-
 import java.io.InputStream;
 import java.util.*;
 
@@ -61,9 +61,43 @@ public class YamlMap implements Map<String,YamlElement> {
         return this.map_.containsValue(value);
     }
 
+    /**
+     * Gets the YamlElement associated with a given String key.
+     *
+     * @param key The key to look for
+     * @return The YamlElement. Null if the Key doesn't exist.
+     */
     @Override
     public YamlElement get(Object key) {
         return this.map_.get(key);
+    }
+
+    /**
+     * Gets the YamlElement linked to a Sting path into the Map.
+     *
+     * @param path The strings that define the Path to dive in.
+     * @return The YamlElement associated to the deepest found path key. Null if the top-level key doesn't exist.
+     */
+    public YamlElement get(String... path) {
+        YamlMap map = this;
+        YamlElement element = null;
+        for (String s : path) {
+            element = map.get(s);
+            map = element.get(YamlElementType.MAP);
+            if (map == null) { break; }
+        }
+        return element;
+    }
+
+    /**
+     * Gets the YamlElement linked to a Sting path into the Map.
+     *
+     * @param path The Yaml path to look into (Elements separated by '.').
+     * @return The YamlElement associated to the deepest found path key. Null if the top-level key doesn't exist.
+     */
+    public YamlElement gerFromPath(String path) {
+        String[] keys = StringUtils.split(path,'.');
+        return this.get(keys);
     }
 
     /**
