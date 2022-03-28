@@ -20,6 +20,16 @@ public class Yamlizer {
     }
 
     public Object deserialize(YamlElement src, TypeHandler type) {
+        Serialization<?> serialization = this.getSerialization_(type);
+        if (serialization != null) {
+            try {
+                return serialization.deserializer().deserialize(src, type.getType());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
         if (type.isArray()) {
             List<YamlElement> yamlElements = src.get(YamlElementType.LIST);
             Type arrayComponent = type.getArrayComponent();
@@ -43,19 +53,20 @@ public class Yamlizer {
             }
         }
 
-        try {
-            return this.getSerialization_(type).deserializer().deserialize(src,type.getType());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        throw new ClassCastException(
+            " Unable to infer deserialization for " + type.getType().getTypeName() +
+            " and no deserializer was found for it. Please define a custom deserializer."
+        );
     };
     public Object deserialize(YamlElement src, Type type) {
         return this.deserialize(src, new TypeHandler(type));
     }
+    public <T> T deserialize(YamlElement src, Class<T> type) {
+        return (T) this.deserialize(src, (Type) type);
+    }
 
     //PRIVATE METHODS
-    private Serialization<?> getSerialization_(TypeHandler type) throws ClassNotFoundException {
+    private Serialization<?> getSerialization_(TypeHandler type) {
         Class clazz = type.getClazz();
 
         boolean repeat = false;
@@ -70,10 +81,7 @@ public class Yamlizer {
             repeat = !repeat;
         } while (repeat);
 
-        throw new ClassCastException(
-            "Unable to infer deserialization for " + clazz.getName() +
-            " and no deserializer was found for it. Please define a custom deserializer."
-        );
+        return null;
     }
 
     //PRIVATE METHODS
