@@ -72,8 +72,7 @@ public class YamlElementType<E> {
                 return type;
             }
         }
-        AbstractYamlConfig.LOGGER.info(object.getClass().getSimpleName() + " is not YAML type assignable.");
-        return null;
+        throw new IllegalArgumentException(object.getClass().getSimpleName() + " is not YAML type assignable.");
     }
 
     @Override

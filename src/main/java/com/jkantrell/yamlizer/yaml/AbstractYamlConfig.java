@@ -12,8 +12,7 @@ import java.util.*;
 public abstract class AbstractYamlConfig {
 
     //FIELDS
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractYamlConfig.class);
-
+    protected Logger logger = LoggerFactory.getLogger("YamlizerConfig");
     protected String filePath;
     protected String subPath = "";
     protected final Yamlizer yamlizer = new Yamlizer();
@@ -48,6 +47,10 @@ public abstract class AbstractYamlConfig {
         this.subPath = subPath;
     }
 
+    public void setLogger(Logger logger) {
+        this.logger = logger;
+    }
+
     //GETTERS
     /**
      * Gets the path where the config object is currently storing the configuration.
@@ -67,7 +70,7 @@ public abstract class AbstractYamlConfig {
         return subPath;
     }
     public Logger getLogger() {
-        return AbstractYamlConfig.LOGGER;
+        return this.logger;
     }
 
     //METHODS
@@ -92,13 +95,13 @@ public abstract class AbstractYamlConfig {
                 Object val = this.yamlizer.deserialize(map.gerFromPath(path),type);
 
                 field.set(this,val);
-                LOGGER.info("Setting " + field.getName() + " to " + val.toString());
+                this.logger.debug("Setting " + field.getName() + " to " + val.toString());
             } catch (Exception e) {
-                LOGGER.warn(
+                this.logger.warn(
                     "Unable to load " + field.getName() + " due to " + e.getClass().toString() + ". Using default."
                 );
                 if (e instanceof NullPointerException) {
-                    LOGGER.warn("The path '" + ((this.subPath.equals(""))?"":(this.subPath + ".")) + path + "' wasn't found in '" + this.filePath + "'.");
+                    this.logger.warn("The path '" + ((this.subPath.equals(""))?"":(this.subPath + ".")) + path + "' wasn't found in '" + this.filePath + "'.");
                 } else {
                     e.printStackTrace();
                 }
