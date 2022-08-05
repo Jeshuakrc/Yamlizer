@@ -83,6 +83,7 @@ public class YamlMap implements Map<String,YamlElement> {
         YamlElement element = null;
         for (String s : path) {
             element = map.get(s);
+            if (element == null) { break; }
             map = element.get(YamlElementType.MAP);
             if (map == null) { break; }
         }
