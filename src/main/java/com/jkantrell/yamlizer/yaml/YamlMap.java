@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+
+import javax.management.openmbean.KeyAlreadyExistsException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -15,6 +17,8 @@ public class YamlMap implements Map<String,YamlElement> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(YamlMap.class);
     protected final HashMap<String,YamlElement> map_ = new HashMap<>();
+
+    public YamlMap() {}
 
     /**
      * Creates a new YamlMap from an InputStream providing Yaml data.
@@ -122,6 +126,34 @@ public class YamlMap implements Map<String,YamlElement> {
     @Override
     public YamlElement put(String key, YamlElement value) {
         return this.map_.put(key,value);
+    }
+
+    public YamlElement putInPath(String key, YamlElement value) {
+        return this.putInPath(StringUtils.split(key,'.'),value);
+    }
+
+    public YamlElement putInPath(String[] keys, YamlElement value) {
+        String myKey = keys[0];
+
+        if(myKey.isEmpty()) {
+            throw new IllegalArgumentException("The 'key' parameter cannot be an empty string.");
+        }
+
+        if (keys.length < 2) {
+            return this.put(myKey, value);
+        }
+
+        if (!this.containsKey(myKey)) {
+            this.put(myKey, new YamlElement(new YamlMap()));
+        }
+
+        YamlElement element = this.get(myKey);
+
+        if (!element.is(YamlElementType.MAP)) {
+            throw new KeyAlreadyExistsException("Element in property '" + myKey + "' is not a map. Can't access sub-property: '" + keys[1] + "'.");
+        }
+
+        return element.get(YamlElementType.MAP).putInPath(Arrays.copyOfRange(keys,1,keys.length),value);
     }
 
     @Override
